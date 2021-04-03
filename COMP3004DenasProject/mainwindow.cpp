@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     control = new Controller(100); //Init controller
     connect(control, SIGNAL(requestTurnOffDevice()), this, SLOT(turnOffDevice())); //the turnOffDevice turns off the device or pop-ups a message or something.
+    connect(control, SIGNAL(changeGUIBattery(int)),this, SLOT(updateBattery(int))); //Connects the battery signal from Control class
     connectTreatmentSignals();
 
 
@@ -169,6 +170,7 @@ void MainWindow::on_ok_clicked()
     else if(ui->menu->currentItem()->text().toInt()){
         qDebug() << "Selected Power Level " << ui->menu->currentItem()->text();
         int powerlevel = ui->menu->currentItem()->text().toInt();
+        control->treatmentList[0]->setPower(powerlevel);
         switch(hash(prevMenu)){
             case eAllergy:
                 qDebug() << "Running Allergy at power level " << powerlevel;
@@ -227,9 +229,7 @@ void MainWindow::on_ok_clicked()
  */
 void MainWindow::turnOffDevice()
 {
-    /*
-     * do something to either turn off device or pop up a message.
-     */
+    ui->timer->setText(":(");
 }
 
 /*
@@ -287,4 +287,9 @@ void MainWindow::on_back_clicked()
         showFrequency();
     }
     prevMenu = "Main";
+}
+
+void MainWindow::updateBattery(int b)
+{
+    ui->progressBar->setValue(b);
 }

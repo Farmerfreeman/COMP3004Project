@@ -14,6 +14,8 @@ Controller::Controller(int battery)
     treatmentList.push_back(new SixtyHz());
     treatmentList.push_back(new TenHz());
     treatmentList.push_back(new TwentyHz());
+
+    connectTreatmentSignals();
 }
 
 
@@ -24,8 +26,30 @@ Controller::Controller(int battery)
 bool Controller::checkIfBatteryIsZero()
 {
     if(batteryLife <= 0){
+        stopTimer();
         emit requestTurnOffDevice();
         return true;
     }
     return false;
+}
+
+void Controller::connectTreatmentSignals()
+{
+    for(unsigned long i = 0; i < treatmentList.size(); i++){
+        connect(treatmentList[i],SIGNAL(sendBatteryUpdate(int)),this,SLOT(updateBattery(int)));
+    }
+}
+
+void Controller::updateBattery(int p)
+{
+    checkIfBatteryIsZero();
+    batteryLife -= p;
+    emit changeGUIBattery(batteryLife);
+}
+
+void Controller::stopTimer()
+{
+    for(unsigned long i = 0; i < treatmentList.size(); i++){
+        treatmentList[i]->stopTimer();
+     }
 }
